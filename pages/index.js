@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import {
-  client, challenge, authenticate, getDefaultProfile,
-  signCreatePostTypedData, lensHub, splitSignature, validateMetadata, getSigner } from '../api'
+  client, challenge, authenticate, getDefaultProfile, refreshAuthToken,
+  signCreatePostTypedData, lensHub, splitSignature, validateMetadata, getSigner, STORAGE_KEY, refresh } from '../api'
 import { create } from 'ipfs-http-client'
 import { v4 as uuid } from 'uuid'
 import { ContractType, LensGatedSDK, LensEnvironment,  } from '@lens-protocol/sdk-gated'
@@ -39,6 +39,10 @@ export default function Home() {
     checkConnection()
   }, [])
   async function checkConnection() {
+    const token = JSON.parse(window.localStorage.getItem(STORAGE_KEY))
+    if (token.accessToken) {
+      setToken(token.accessToken)
+    }
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const accounts = await provider.listAccounts()
     if (accounts.length) {
@@ -49,6 +53,11 @@ export default function Home() {
       })
       setProfileId(response.data.defaultProfile.id)
       setHandle(response.data.defaultProfile.handle)
+      const { accessToken } = await refreshAuthToken()
+
+      if (accessToken) {
+        setToken(accessToken)
+      }
     }
   }
   async function connect() {
@@ -77,10 +86,9 @@ export default function Home() {
         }
       })
       /* if user authentication is successful, you will receive an accessToken and refreshToken */
-      const { data: { authenticate: { accessToken }}} = authData
-      console.log({ accessToken })
-      setToken(accessToken)
-      window.localStorage.setItem('lens-auth-token', accessToken)
+      const { data: { authenticate: authTokens }} = authData
+      setToken(authTokens.accessToken)
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(authTokens))
     } catch (err) {
       console.log('Error signing in: ', err)
     }
@@ -91,11 +99,6 @@ export default function Home() {
     const {
       encryptedMetadata, contentURI
     } = await uploadToIPFS()
-    console.log({ encryptedMetadata})
-    return
-    console.log({
-      contentURI
-    })
 
     const createPostRequest = {
       profileId,
@@ -165,9 +168,6 @@ export default function Home() {
     const { contentURI, encryptedMetadata } = await sdk.gated.encryptMetadata(
       metadata,
       profileId,
-      AccessConditionOutput = {
-        
-      },
       {
         nft: nftAccessCondition
       },

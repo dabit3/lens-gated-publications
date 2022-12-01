@@ -7,14 +7,15 @@ import LENS_HUB_ABI from './ABI.json'
 export const LENS_HUB_CONTRACT = "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d"
 export const lensHub = new ethers.Contract(LENS_HUB_CONTRACT, LENS_HUB_ABI, getSigner())
 
+export const STORAGE_KEY = 'lens-auth-token'
 const API_URL = 'https://api.lens.dev'
 
-const authLink = setContext((_, { headers }) => {
-  const token = window.localStorage.getItem('lens-auth-token')
+const authLink = setContext(async (_, { headers }) => {
+  const token = JSON.parse(window.localStorage.getItem(STORAGE_KEY))
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
+      authorization: token ? `Bearer ${token.accessToken}` : "",
     }
   }
 })
@@ -70,6 +71,40 @@ export const authenticate = gql`
     }
   }
 `
+
+export const refresh = gql`
+  mutation Refresh(
+    $refreshToken: Jwt!
+  ) {
+    refresh(request: {
+      refreshToken: $refreshToken
+    }) {
+      accessToken
+      refreshToken
+    }
+  }
+`
+
+export async function refreshAuthToken() {
+  const { refreshToken } = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  console.log({ refreshToken })
+  if (!refreshToken) return
+  try {
+    const authData = await client.mutate({
+      mutation: refresh,
+      variables: {
+        refreshToken
+      }
+    })
+
+    if (!authData.data) return
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(authData.data.refresh))
+
+    return authData.data.refresh
+  } catch (err) {
+    console.log('error:', err)
+  }
+}
 
 export async function createPostTypedDataMutation (request, token) {
   const result = await client.mutate({
@@ -234,6 +269,9 @@ fragment MetadataOutputFields on MetadataOutput {
     value
   }
   encryptionParams {
+    providerSpecificParams {
+      encryptionKey
+    }
     accessCondition {
       or {
         criteria {

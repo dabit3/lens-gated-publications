@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import {
-  client, challenge, authenticate, getDefaultProfile, getPublications,
-  signCreatePostTypedData, lensHub, splitSignature, validateMetadata, getSigner } from '../api'
+  client, getDefaultProfile, getPublications, getSigner } from '../api'
 import { ethers } from 'ethers'
-import { ContractType, LensGatedSDK, LensEnvironment,  } from '@lens-protocol/sdk-gated'
+import {  LensGatedSDK, LensEnvironment,  } from '@lens-protocol/sdk-gated'
 
 export default function Feed() {
-  const [posts, gatedPosts] = useState([])
+  const [posts, setPosts] = useState([])
   useEffect(() => {
     checkConnection()
   }, [])
@@ -33,44 +32,40 @@ export default function Feed() {
       })
       let posts = result.data.publications.items
       posts = posts.filter(post => post.canDecrypt && post.canDecrypt.result)
-      console.log({ posts })
+
       const sdk = await LensGatedSDK.create({
         provider: new ethers.providers.Web3Provider(window.ethereum),
         signer: getSigner(), //from wagmi or a wallet
         env: LensEnvironment.Polygon,
       })
-
-      console.log("METADATA: ", posts[0].metadata)
       
-      let meta = { ...posts[0].metadata }
-      // meta.encryptionParams = {...meta.encryptionParams }
-      // meta.encryptionParams.accessCondition = { ...meta.encryptionParams.accessCondition }
-      // meta.encryptionParams.accessCondition.or = { ...meta.encryptionParams.accessCondition.or }
-      // meta.encryptionParams.accessCondition.or = {
-      //   criteria: {
-      //     ...meta.encryptionParams.accessCondition.or.criteria
-      //   }
-      // }
+      posts = await Promise.all(posts.map(async post => {
+        try {
+          const { decrypted } = await sdk.gated.decryptMetadata(post.metadata)
+          return decrypted
+        } catch (err) {
+          console.log('error decrypting: ', err)
+          return null
+        }
+      }))
 
-      // delete meta.encryptionParams.accessCondition['__typename']
-
-      // delete meta.encryptionParams.accessCondition.or.criteria[0]['nft']
-      // delete meta.encryptionParams.accessCondition.or.criteria[0]['__typename']
-      // delete meta.encryptionParams.accessCondition.or.criteria[1]['profile']
-      // delete meta.encryptionParams.accessCondition.or.criteria[1]['__typename']
-      console.log("META 2: ", meta)
-      
-      const { error, decrypted } = await sdk.gated.decryptMetadata(meta)
-
-      console.log("decrypted: ", decrypted)
-      console.log("error: ", error)
+      console.log({ posts })
+          
+      setPosts(posts)
     } catch (err) {
       console.log("Error fetching posts...", err)
     }
   }
   return (
     <div>
-      <h1>Posts</h1>
+      <h1>Gated Posts</h1>
+      {
+        posts.map((post, index) => (
+          <div key={index}>
+            <h2>{post.content}</h2>
+          </div>
+        ))
+      }
     </div>
   )
 }

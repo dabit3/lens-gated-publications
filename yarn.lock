@@ -396,10 +396,10 @@
   dependencies:
     multiformats "^10.0.2"
 
-"@lens-protocol/sdk-gated@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@lens-protocol/sdk-gated/-/sdk-gated-1.1.0.tgz#a74001a9f0985ae2587f812f1c5b2f6fee792590"
-  integrity sha512-fAS8ZzaC19IRHtHHOQrAYsmoWln231wLaQuXyktmFn3fnQc3Yx9H9eyuEDK+BDzQu9eaTWGm6ySvthENKP9WSw==
+"@lens-protocol/sdk-gated@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@lens-protocol/sdk-gated/-/sdk-gated-1.1.1.tgz#fb40bfc54e5b8622d07fd3a89b42197c280b5ab8"
+  integrity sha512-UAxUzI/zt5ftl7clH84aK+VPlYfNZTcgm3F7AuJkID5EAYzMMS+4wd9yGGGi7HgwzKFaB6JXcq1i3VCmk+3wSg==
   dependencies:
     "@apollo/client" "^3.7.1"
     "@ethersproject/address" "^5.7.0"
@@ -675,9 +675,9 @@
   integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
 
 "@types/node@>=13.7.0", "@types/node@^18.0.0":
-  version "18.11.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.9.tgz#02d013de7058cea16d36168ef2fc653464cfbad4"
-  integrity sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==
+  version "18.11.10"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.10.tgz#4c64759f3c2343b7e6c4b9caf761c7a3a05cee34"
+  integrity sha512-juG3RWMBOqcOuXC643OAdSA525V44cVgGV6dUDuiFtss+8Fk5x1hI93Rsld43VeJVIeqlP9I7Fn9/qaVqoEAuQ==
 
 "@wry/context@^0.7.0":
   version "0.7.0"
@@ -781,9 +781,9 @@ busboy@^1.6.0:
     streamsearch "^1.1.0"
 
 caniuse-lite@^1.0.30001406:
-  version "1.0.30001434"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001434.tgz#ec1ec1cfb0a93a34a0600d37903853030520a4e5"
-  integrity sha512-aOBHrLmTQw//WFa2rcF1If9fa3ypkC1wzqqiKHgfdrXTWcU8C4gKVZT77eQAPWN1APys3+uQ0Df07rKauXGEYA==
+  version "1.0.30001435"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001435.tgz#502c93dbd2f493bee73a408fe98e98fb1dad10b2"
+  integrity sha512-kdCkUTjR+v4YAJelyiDTqiu82BDr4W4CP5sgTA0ZBmqn30XfS2ZghPLMowik9TPhS+psWJiUNxsqLyurDbmutA==
 
 cborg@^1.5.4, cborg@^1.6.0:
   version "1.9.6"
