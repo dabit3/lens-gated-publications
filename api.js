@@ -159,7 +159,7 @@ query Publications($profileId: ProfileId) {
   publications(request: {
     profileId: $profileId,
     publicationTypes: [POST, COMMENT, MIRROR],
-    limit: 10
+    limit: 20
   }) {
     items {
       __typename 

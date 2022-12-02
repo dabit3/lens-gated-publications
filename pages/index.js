@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import {
   client, challenge, authenticate, getDefaultProfile, refreshAuthToken,
-  signCreatePostTypedData, lensHub, splitSignature, validateMetadata, getSigner, STORAGE_KEY, refresh } from '../api'
+  signCreatePostTypedData, lensHub, splitSignature, validateMetadata,
+  getSigner, STORAGE_KEY
+} from '../api'
 import { create } from 'ipfs-http-client'
 import { v4 as uuid } from 'uuid'
 import { ContractType, LensGatedSDK, LensEnvironment,  } from '@lens-protocol/sdk-gated'
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 const projectSecret = process.env.NEXT_PUBLIC_PROJECT_SECRET
-const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64')
 
 const ipfsClient = create({
   host: 'ipfs.infura.io',
@@ -17,7 +19,7 @@ const ipfsClient = create({
   protocol: 'https',
   headers: {
       authorization: auth,
-  },
+  }
 })
 
 const nftAccessCondition = {
