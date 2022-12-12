@@ -1,20 +1,43 @@
 import '../styles/globals.css'
 import Link from 'next/link'
+import { css } from '@emotion/css'
 
 function MyApp({ Component, pageProps }) {
   return (
-    <div>
+    <div className={navContainerStyle}>
       <nav>
-        <Link href="/">
+        <Link href="/" className={linkStyle}>
           Home
         </Link>
-        <Link href="/feed">
+        <Link href="/feed" className={linkStyle}>
           Feed
         </Link>
       </nav>
-      <Component {...pageProps} />
+      <div className={containerStyle}>
+        <div className={wrapperStyle}>
+          <Component {...pageProps} />
+        </div>
+      </div>
     </div>
   )
 }
+
+const navContainerStyle = css`
+  padding: 20px 120px;
+`
+
+const linkStyle = css`
+  margin-left: 20px;
+`
+
+const wrapperStyle = css`
+  width: 900px;
+  padding-top: 50px;
+`
+
+const containerStyle = css`
+  display: flex;
+  justify-content: center;
+`
 
 export default MyApp

@@ -86,14 +86,13 @@ export const refresh = gql`
 `
 
 export async function refreshAuthToken() {
-  const { refreshToken } = JSON.parse(localStorage.getItem(STORAGE_KEY))
-  console.log({ refreshToken })
-  if (!refreshToken) return
+  const token = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  if (!token) return
   try {
     const authData = await client.mutate({
       mutation: refresh,
       variables: {
-        refreshToken
+        refreshToken: token.refreshToken
       }
     })
 
