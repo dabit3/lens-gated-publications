@@ -154,11 +154,14 @@ mutation createPostTypedData($request: CreatePublicPostRequest!) {
 `
 
 export const getPublications = gql`
-query Publications($profileId: ProfileId) {
+query Publications(
+  $profileId: ProfileId
+  $limit: LimitScalar
+  ) {
   publications(request: {
     profileId: $profileId,
     publicationTypes: [POST, COMMENT, MIRROR],
-    limit: 20
+    limit: $limit
   }) {
     items {
       __typename 
@@ -257,23 +260,20 @@ fragment MetadataOutputFields on MetadataOutput {
   name
   description
   content
-  media {
-    original {
-      ...MediaFields
-    }
-  }
-  attributes {
-    displayType
-    traitType
-    value
-  }
-  encryptionParams {
+    encryptionParams {
     providerSpecificParams {
       encryptionKey
     }
     accessCondition {
       or {
         criteria {
+          token {
+            contractAddress
+            chainID
+            amount 
+            decimals
+            condition
+          }
           nft {
             contractAddress
             chainID
@@ -289,6 +289,16 @@ fragment MetadataOutputFields on MetadataOutput {
       content
       external_url
     }
+  }
+  media {
+    original {
+      ...MediaFields
+    }
+  }
+  attributes {
+    displayType
+    traitType
+    value
   }
 }
 
@@ -534,7 +544,6 @@ fragment ReferenceModuleFields on ReferenceModule {
     degreesOfSeparation
   }
 }
-
 `
 
 export function getSigner() {

@@ -7,7 +7,7 @@ import {
 } from '../api'
 import { create } from 'ipfs-http-client'
 import { v4 as uuid } from 'uuid'
-import { ContractType, LensGatedSDK, LensEnvironment,  } from '@lens-protocol/sdk-gated'
+import { ContractType, LensGatedSDK, LensEnvironment, ScalarOperator } from '@lens-protocol/sdk-gated'
 import { css } from '@emotion/css'
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
@@ -32,6 +32,7 @@ export default function Home() {
   const [profileId, setProfileId] = useState('')
   const [gatingType, setGatingType] = useState('nft')
   const [chainID, setChainID] = useState(1)
+  const [decimals, setDecimals] = useState('18')
   const [contractAddress, setContractAddress] = useState()
 
   let accessCondition = {
@@ -113,9 +114,16 @@ export default function Home() {
       accessCondition.contractType = ContractType.Erc721
       gated.nft = accessCondition
     } else {
-      accessCondition.contractType = ContractType.Erc20
-      gated.Erc20 = accessCondition
+      accessCondition = {
+        ...accessCondition,
+        amount: '1',
+        decimals: parseInt(decimals),
+        condition: ScalarOperator.GreaterThanOrEqual,
+      }
+      gated.token = accessCondition
     }
+
+    console.log({ gated })
 
     const createPostRequest = {
       profileId,
@@ -186,9 +194,14 @@ export default function Home() {
         nft: accessCondition
       }
     } else {
-      accessCondition.contractType = ContractType.Erc20
+      accessCondition = {
+        ...accessCondition,
+        amount: '1',
+        decimals,
+        condition: ScalarOperator.GreaterThanOrEqual,
+      }      
       condition = {
-        Erc20: accessCondition
+        token: accessCondition
       }
     }
 
@@ -205,8 +218,6 @@ export default function Home() {
         return added
       },
     )
-
-
 
     console.log("contentURI: ", contentURI)
     console.log("encryptedMetadata: ", encryptedMetadata)
@@ -266,6 +277,11 @@ export default function Home() {
                     placeholder='ERC20 Contract Address'
                     className={inputStyle}
                     onChange={e => setContractAddress(e.target.value)}
+                  />
+                  <input
+                    placeholder='ERC20 Contract Decimals'
+                    className={inputStyle}
+                    onChange={e => setDecimals(e.target.value)}
                   />
                   <GatingSelect onChange={onSelectChange} />
 
