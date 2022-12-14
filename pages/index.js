@@ -10,6 +10,7 @@ import { v4 as uuid } from 'uuid'
 import { ContractType, LensGatedSDK, LensEnvironment, ScalarOperator } from '@lens-protocol/sdk-gated'
 import { css } from '@emotion/css'
 
+/* Infura IPFS configuration. Set these values in .env.local (see .example.env.local) */
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 const projectSecret = process.env.NEXT_PUBLIC_PROJECT_SECRET
 const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64')
@@ -34,10 +35,12 @@ export default function Home() {
   const [chainID, setChainID] = useState(1)
   const [decimals, setDecimals] = useState('18')
   const [contractAddress, setContractAddress] = useState()
+  const [amount, setAmount] = useState('')
 
+  /* base access conditions for both NFT or ERC20 gating */
   let accessCondition = {
     contractAddress,
-    chainID
+    chainID: parseInt(chainID)
   }
 
   useEffect(() => {
@@ -45,22 +48,30 @@ export default function Home() {
     checkConnection()
   }, [])
   async function checkConnection() {
-    const token = JSON.parse(window.localStorage.getItem(STORAGE_KEY))
-    if (token && token.accessToken) {
-      setToken(token.accessToken)
-    }
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const accounts = await provider.listAccounts()
+    if (!accounts[0]) return
+    const token = JSON.parse(window.localStorage.getItem(STORAGE_KEY))
+    if (token && token.accessToken) {
+      /* if access token exists, set it locally */
+      setToken(token.accessToken)
+    }
     if (accounts.length) {
       setAddress(accounts[0])
+      /* fetch the user's profiile information */
       const response = await client.query({
         query: getDefaultProfile,
         variables: { address: accounts[0] }
       })
+      if (!response.data.defaultProfile) {
+        console.log('error... user does not have a profile')
+        return
+      }
+      /* store the user's profile ID and handle in the local state for usage in post */
       setProfileId(response.data.defaultProfile.id)
       setHandle(response.data.defaultProfile.handle)
+      /* refresh the user's access token and store it in the local state */
       const token = await refreshAuthToken()
-
       if (token && token.accessToken) {
         setToken(token.accessToken)
       }
@@ -93,6 +104,7 @@ export default function Home() {
       })
       /* if user authentication is successful, you will receive an accessToken and refreshToken */
       const { data: { authenticate: authTokens }} = authData
+      /* here we store the accessToken in the local state, and both tokens in the localStorage */
       setToken(authTokens.accessToken)
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(authTokens))
     } catch (err) {
@@ -102,6 +114,7 @@ export default function Home() {
 
   async function createPost() {
     if (!postData) return
+    /* we first encrypt and upload the data to IPFS */
     const {
       encryptedMetadata, contentURI
     } = await uploadToIPFS()
@@ -116,15 +129,14 @@ export default function Home() {
     } else {
       accessCondition = {
         ...accessCondition,
-        amount: '1',
+        amount,
         decimals: parseInt(decimals),
         condition: ScalarOperator.GreaterThanOrEqual,
       }
       gated.token = accessCondition
     }
 
-    console.log({ gated })
-
+    /* configure the final post data containing the content URI and the gated configuration */
     const createPostRequest = {
       profileId,
       contentURI: 'ipfs://' + contentURI.path,
@@ -137,6 +149,7 @@ export default function Home() {
       gated
     }
     try {
+      /* this code creates a typed data request (using the createPostRequest object) and sends the transaction to the network */
       const signedResult = await signCreatePostTypedData(createPostRequest, token)
       const typedData = signedResult.result.typedData
       const { v, r, s } = splitSignature(signedResult.signature)
@@ -160,6 +173,7 @@ export default function Home() {
     }
   }
   async function uploadToIPFS() {
+    /* define the metadata */
     const metadata = {
       version: '2.0.0',
       content: postData,
@@ -172,6 +186,7 @@ export default function Home() {
       locale: 'en-US',
     }
 
+    /* this is an optional API call to verify that the metadata is properly formatted */
     const result = await client.query({
       query: validateMetadata,
       variables: {
@@ -180,14 +195,16 @@ export default function Home() {
     })
     console.log('Metadata verification request: ', result)
 
+    /* create an instance of the Lens SDK gated content with the environment */
     const sdk = await LensGatedSDK.create({
       provider: new ethers.providers.Web3Provider(window.ethereum),
       signer: getSigner(),
-      env: LensEnvironment.Polygon,
+      env: process.env.NEXT_PUBLIC_ENVIRONMENT || LensEnvironment.Mumbai
     })
 
     let condition = {}
 
+    /* check the gating type (nft or ERC20) and define access condition */
     if (gatingType === 'nft') {
       accessCondition.contractType = ContractType.Erc721
       condition = {
@@ -196,7 +213,7 @@ export default function Home() {
     } else {
       accessCondition = {
         ...accessCondition,
-        amount: '1',
+        amount,
         decimals,
         condition: ScalarOperator.GreaterThanOrEqual,
       }      
@@ -205,8 +222,7 @@ export default function Home() {
       }
     }
 
-    console.log({ condition })
-
+    /* encrypt the metadata using the Lens SDK and upload it to IPFS */
     const { contentURI, encryptedMetadata } = await sdk.gated.encryptMetadata(
       metadata,
       profileId,
@@ -219,9 +235,7 @@ export default function Home() {
       },
     )
 
-    console.log("contentURI: ", contentURI)
-    console.log("encryptedMetadata: ", encryptedMetadata)
-  
+    /* return the metadata and contentURI to the caller */
     return {
       encryptedMetadata, contentURI
     }
@@ -238,13 +252,13 @@ export default function Home() {
     <div>
       { /* if the user has not yet connected their wallet, show a connect button */ }
       {
-        !address && <button onClick={connect}>Connect</button>
+        !address && <button className={baseButtonStyle} onClick={connect}>Connect</button>
       }
       { /* if the user has connected their wallet but has not yet authenticated, show them a login button */ }
       {
         address && !token && (
           <div onClick={login}>
-            <button>Login</button>
+            <button className={baseButtonStyle}>Login</button>
           </div>
         )
       }
@@ -265,6 +279,7 @@ export default function Home() {
                     className={inputStyle}
                     onChange={e => setContractAddress(e.target.value)}
                   />
+                  <p>Contract chain</p>
                   <GatingSelect onChange={onSelectChange} />
                 </div>
               )
@@ -279,12 +294,18 @@ export default function Home() {
                     onChange={e => setContractAddress(e.target.value)}
                   />
                   <input
-                    placeholder='ERC20 Contract Decimals'
+                    placeholder='Number of tokens needed to decrypt'
+                    className={inputStyle}
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                  />
+                  <input
+                    placeholder='Number of Contract Decimals'
                     className={inputStyle}
                     onChange={e => setDecimals(e.target.value)}
                   />
+                  <p>Contract chain</p>
                   <GatingSelect onChange={onSelectChange} />
-
                 </div>
               )
             }
@@ -301,9 +322,9 @@ export default function Home() {
   )
 }
 
-function GatingSelect({ onSelectChange }) {
+function GatingSelect({ onChange }) {
   return (
-    <select name="chains" id="chains" className={selectStyle} onChange={onSelectChange}>
+    <select name="chains" id="chains" className={selectStyle} onChange={onChange}>
       <option value="1">Etherem</option>
       <option value="137">Polygon</option>
       <option value="10">Optimism</option>
@@ -329,6 +350,9 @@ const inputStyle = css`
   border: 1px solid rgba(0, 0, 0, .25);
   padding: 9px 15px;
   border-radius: 25px;
+  width: 320px;
+  margin-bottom: 5px;
+  margin-left: 4px;
 `
 
 const textAreaStyle = css`
@@ -339,11 +363,11 @@ const textAreaStyle = css`
 
 const conditionContainerStyle = css`
   margin: 5px 0px 20px;
+  display: flex;
+  flex-direction: column;
 `
 
-const buttonStyle = (base, type) => {
-  let color = base === type ? '#328ce5' : '#1976d2'
-  return css`
+const baseButtonStyle = css`
   border: none;
   outline: none;
   padding: 13px 35px;
@@ -352,9 +376,16 @@ const buttonStyle = (base, type) => {
   cursor: pointer;
   font-weight: 800;
   color: white;
-  background-color: ${color};
+  background-color: #328ce5;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, .2);
 `
+
+const buttonStyle = (base, type) => {
+  let color = base === type ? '#328ce5' : '#1976d2'
+  return css`
+    ${baseButtonStyle};
+    background-color: ${color};
+  `
 }
 
 const submitButtonStyle = css`

@@ -160,7 +160,7 @@ query Publications(
   ) {
   publications(request: {
     profileId: $profileId,
-    publicationTypes: [POST, COMMENT, MIRROR],
+    publicationTypes: [POST],
     limit: $limit
   }) {
     items {
