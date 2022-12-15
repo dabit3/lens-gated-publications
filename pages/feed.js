@@ -69,7 +69,7 @@ export default function Feed() {
 
   return (
     <div>
-      <h1>Gated Posts viewable by signed in user</h1>
+      <h1>Gated publications viewable by signed in user</h1>
       { loading && <p>Loading and decrypting posts ...</p>}
       {
         posts.map((post, index) => (
