@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, gql, createHttpLink } from '@apollo/client
 import omitDeep from 'omit-deep'
 import { utils, ethers } from 'ethers'
 import { setContext } from '@apollo/client/link/context';
-import LENS_HUB_ABI from './ABI.json'
+import LENS_HUB_ABI from './abi.json'
 
 export const LENS_HUB_CONTRACT = "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d"
 export const lensHub = new ethers.Contract(LENS_HUB_CONTRACT, LENS_HUB_ABI, getSigner())
