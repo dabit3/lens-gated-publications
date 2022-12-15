@@ -12,6 +12,9 @@ function MyApp({ Component, pageProps }) {
         <Link href="/feed" className={linkStyle}>
           Feed
         </Link>
+        <Link href="/decrypt-publication" className={linkStyle}>
+          Decrypt Publication
+        </Link>
       </nav>
       <div className={containerStyle}>
         <div className={wrapperStyle}>

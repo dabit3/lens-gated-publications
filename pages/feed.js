@@ -37,7 +37,6 @@ export default function Feed() {
         }
       })
       let posts = result.data.publications.items
-      console.log({ posts })
       /* next we filter to only the posts that can be decrypted */
       posts = posts.filter(post => post.canDecrypt && post.canDecrypt.result)
 
@@ -47,11 +46,11 @@ export default function Feed() {
         signer: getSigner(),
         env: process.env.NEXT_PUBLIC_ENVIRONMENT || LensEnvironment.Mumbai,
       })
-      console.log("signer:::: ", getSigner())
-        
+
       posts = await Promise.all(posts.map(async post => {
         try {
           const { decrypted } = await sdk.gated.decryptMetadata(post.metadata)
+          decrypted.id = post.id
           return decrypted
         } catch (err) {
           console.log('error decrypting: ', err)
@@ -65,6 +64,9 @@ export default function Feed() {
       console.log("Error fetching posts...", err)
     }
   }
+
+  console.log({ posts })
+
   return (
     <div>
       <h1>Gated Posts viewable by signed in user</h1>
@@ -73,6 +75,7 @@ export default function Feed() {
         posts.map((post, index) => (
           <div className={postContainerStyle} key={index}>
             <p>{post.content}</p>
+            <p>Post ID: {post.id}</p>
           </div>
         ))
       }
