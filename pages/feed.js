@@ -16,14 +16,18 @@ export default function Feed() {
     const accounts = await provider.listAccounts()
     if (accounts.length) {
       /* if the user's wallet is connected, call the API and get the user's profile information */
-      const response = await client.query({
-        query: getDefaultProfile,
-        variables: {
-          address: accounts[0],
-          limit: 50
-        }
-      })
-      fetchPosts(response.data.defaultProfile.id)
+      try {
+        const response = await client.query({
+          query: getDefaultProfile,
+          variables: {
+            address: accounts[0],
+            limit: 50
+          }
+        })
+        fetchPosts(response.data.defaultProfile.id)
+      } catch (err) {
+        console.log('error fetching profile data...')
+      }
     }
   }
   async function fetchPosts(profileId) {
