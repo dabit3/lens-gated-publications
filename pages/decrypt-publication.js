@@ -73,7 +73,7 @@ export default function Feed() {
   }
   return (
     <div className={contentContainerStyle}>
-      <h1>Gated Posts viewable by signed in user</h1>
+      <h1>Decrypt an individual publication</h1>
       <input
         onChange={e => setPublicationId(e.target.value)}
         placeholder="ID of post"
