@@ -13,8 +13,11 @@ function MyApp({ Component, pageProps }) {
           Feed
         </Link>
         <Link href="/decrypt-publication" className={linkStyle}>
-          Decrypt Publication
+          Decrypt publication
         </Link>
+        <a className={linkStyle} href="https://github.com/dabit3/lens-token-gating" target="_blank" rel="noopener noreferrer">
+          Code
+        </a>
       </nav>
       <div className={containerStyle}>
         <div className={wrapperStyle}>

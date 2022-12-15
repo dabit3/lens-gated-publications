@@ -20,11 +20,13 @@ npm install
 # or yarn, pnpm, etc...
 ```
 
-3. Configure the environment variables. Update `.example.env.local` to `.env.local` and configure the `NEXT_PUBLIC_PROJECT_ID` and `NEXT_PUBLIC_PROJECT_SECRET` with your Infura project information.
+3. Configure the environment variables.   
+ 
+Update `.example.env.local` to `.env.local` and configure the `NEXT_PUBLIC_PROJECT_ID` and `NEXT_PUBLIC_PROJECT_SECRET` with your Infura project information.
 
 Also optionally configure the `NEXT_PUBLIC_ENVIRONMENT` with the network you'd like to connect to.
 
-4. Run the app
+1. Run the app
 
 ```sh
 npm run dev
