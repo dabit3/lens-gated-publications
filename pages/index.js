@@ -65,6 +65,7 @@ export default function Home() {
       })
       if (!response.data.defaultProfile) {
         console.log('error... user does not have a profile')
+        window.localStorage.removeItem(STORAGE_KEY)
         return
       }
       /* store the user's profile ID and handle in the local state for usage in post */

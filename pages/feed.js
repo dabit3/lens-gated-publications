@@ -76,6 +76,9 @@ export default function Feed() {
       <h1>Gated publications viewable by signed in user</h1>
       { loading && <p>Loading and decrypting posts ...</p>}
       {
+        !loading && !posts.length && <p>No encrypted posts to view ...</p>
+      }
+      {
         posts.map((post, index) => (
           <div className={postContainerStyle} key={index}>
             <p>{post.content}</p>
