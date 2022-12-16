@@ -326,7 +326,7 @@ export default function Home() {
 function GatingSelect({ onChange }) {
   return (
     <select name="chains" id="chains" className={selectStyle} onChange={onChange}>
-      <option value="1">Etherem</option>
+      <option value="1">Ethereum</option>
       <option value="137">Polygon</option>
       <option value="10">Optimism</option>
       <option value="42161">Arbitrum</option>
